@@ -76,6 +76,10 @@ class Maze {
         return this.getSquare(position).hasToBeHandled();
     }
 
+    getNumberOfIterations () {
+        return this.getSquare(new Position(0, 0)).getNumberOfIterations();
+    }
+
     newIteration () {
         this.square.forEach((square) => square.newIteration());
     }
@@ -84,22 +88,43 @@ class Maze {
         return this.square[position.row * this.width + position.column];
     }
 
-    draw () {
+    draw (iteration) {
         return this.initialized.then(() => {
             for (let row = 0; row < this.height; ++row) {
                 for (let column = 0; column < this.width; ++column) {
                     let position = new Position(column, row);
-                    this.context.fillStyle = this.getSquare(position).getCurrentRGB();
+                    this.context.fillStyle = this.getSquare(position).getRGB(iteration);
                     this.context.fillRect(column, row, 1, 1);
                 }
             }
         });
+    }
+
+    drawCurrent () {
+        return this.initialized.then(() => {
+            this.draw(this.getNumberOfIterations() - 1);
+        });
+    }
+
+    drawIterations (ms_per_iteration) {
+        let current_iteration = 0;
+        let drawer = setInterval(() => {
+            this.draw(current_iteration++);
+
+            if (current_iteration >= this.getNumberOfIterations()) {
+                clearInterval(drawer);
+            }
+        }, ms_per_iteration);
     }
 }
 
 class Square {
     constructor () {
         this.type = ['path'];
+    }
+
+    getNumberOfIterations () {
+        return this.type.length;
     }
 
     newIteration () {
@@ -126,7 +151,7 @@ class Square {
         }
     }
 
-    getRGB (time) {
+    getRGB (iteration) {
         const TYPE2RGB = {
             path: 'rgb(255, 255, 255)',
             entrance: 'rgb(255, 255, 255)',
@@ -136,7 +161,7 @@ class Square {
             traversed: 'rgb(100, 100, 100)',
         };
 
-        return TYPE2RGB[this.type[time]];
+        return TYPE2RGB[this.type[iteration]];
     }
 
     getCurrentRGB () {
@@ -256,15 +281,15 @@ function displayWarning (message) {
 }
 
 function init () {
-    let maze = new Maze('maze', 'simple.png');
-    maze.draw().then(() => {
+    let maze = new Maze('maze', 'big.png');
+    maze.drawCurrent().then(() => {
         let solver = new DFSSolver(maze);
         if (solver.solve()) {
             displayInfo('Found solution in TODO seconds.');
         } else {
             displayInfo('Determined maze had no solution in TODO seconds.');
         }
-        maze.drawIterations(500);
+        maze.drawIterations(50);
     });
 
     initUI();
