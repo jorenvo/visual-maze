@@ -32,6 +32,13 @@ class Maze {
             if (i && i % 4 === 0) {
                 let new_square = new Square();
                 new_square.initFromRGBA(...rgba);
+
+                if (new_square.type === 'entrance') {
+                    this.entrance = new Position(Math.floor(this.square.length / this.maze_width), this.square.length % this.maze_height);
+                } else if (new_square.type === 'exit') {
+                    this.exit = new Position(Math.floor(this.square.length / this.maze_width), this.square.length % this.maze_height);
+                }
+
                 this.square.push(new_square);
                 rgba = [];
             }
@@ -61,8 +68,12 @@ class Maze {
 
 class Square {
     initFromRGBA (r, g, b, a) {
-        if (r === 255) {
+        if (r === 255 && g === 255 && b === 255) {
             this.type = 'path';
+        } else if (r === 0 && g === 255 && b === 0) {
+            this.type = 'entrance';
+        } else if (r === 0 && g === 0 && b === 255) {
+            this.type = 'exit';
         } else {
             this.type = 'wall';
         }
@@ -71,6 +82,8 @@ class Square {
     toRGB () {
         const TYPE2RGB = {
             path: 'rgb(255, 255, 255)',
+            entrance: 'rgb(255, 255, 255)',
+            exit: 'rgb(255, 255, 255)',
             wall: 'rgb(0, 0, 0)',
             solution: 'rgb(255, 0, 0)',
         };
@@ -79,22 +92,11 @@ class Square {
     }
 }
 
-function image2maze (image_data) {
-    let maze = [];
-    let rgba = [];
-    for (let i = 0; i <= image_data.data.length; ++i) {
-        if (i && i % 4 === 0) {
-            let new_square = new Square();
-            new_square.initFromRGBA(...rgba);
-            maze.push(new_square);
-            rgba = [];
-        }
-
-        if (i < image_data.data.length) {
-            rgba.push(image_data.data[i]);
-        }
+class Position {
+    constructor (row, column) {
+        this.row = row;
+        this.column = column;
     }
-    return maze;
 }
 
 function _initButtonGroup (group_id) {
@@ -111,7 +113,7 @@ function initUI () {
 }
 
 function init () {
-    let maze = new Maze('maze', 'big.png');
+    let maze = new Maze('maze', 'simple.png');
     maze.draw();
 
     initUI();
