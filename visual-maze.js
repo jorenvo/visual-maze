@@ -292,10 +292,13 @@ function initMaze () {
 function runSolver () {
     let solve_button = document.getElementById('solve');
     let solver = new DFSSolver(maze);
-    if (solver.solve()) {
-        displayInfo('Found solution in TODO seconds.');
+    let start_time = Date.now();
+    let solved = solver.solve();
+    let elapsed_time = (Date.now() - start_time) / 1000;
+    if (solved) {
+        displayInfo(`Found solution in ${elapsed_time} seconds.`);
     } else {
-        displayInfo('Determined maze had no solution in TODO seconds.');
+        displayInfo(`Determined maze had no solution in ${elapsed_time} seconds.`);
     }
 
     solve_button.classList.add('disabled');
