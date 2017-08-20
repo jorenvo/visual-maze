@@ -8,6 +8,7 @@ class Maze {
         this.context = this.canvas.getContext('2d');
         this.square = [];
         this.initialized = this._initializeFrom(init_image_name);
+        this.solved = false;
     }
 
     _validateState () {
@@ -111,21 +112,25 @@ class Maze {
     }
 
     drawIterations () {
-        let current_iteration = 0;
-        let draw_function = () => {
-            let delay_ms = getCurrentAnimationSpeedMs();
+        return new Promise((resolve, _) => {
+            let current_iteration = 0;
+            let draw_function = () => {
+                let delay_ms = getCurrentAnimationSpeedMs();
 
-            if (delay_ms) {
-                this.draw(current_iteration++);
+                if (delay_ms) {
+                    this.draw(current_iteration++);
 
-                if (current_iteration < this.getNumberOfIterations()) {
-                    setTimeout(draw_function, getCurrentAnimationSpeedMs());
+                    if (current_iteration < this.getNumberOfIterations()) {
+                        setTimeout(draw_function, getCurrentAnimationSpeedMs());
+                    } else {
+                        resolve();
+                    }
+                } else {
+                    this.drawCurrent().then(resolve);
                 }
-            } else {
-                this.drawCurrent();
-            }
-        };
-        draw_function();
+            };
+            draw_function();
+        });
     }
 }
 
@@ -220,12 +225,13 @@ class Solver {
     }
 
     solve () {
-        console.error('Not implemented');
+        this.maze.solved = true;
     }
 }
 
 class DFSSolver extends Solver {
     solve () {
+        super.solve();
         let found_exit = this.findExit(this.maze.entrance);
         this.markSolution();
         return found_exit;
@@ -276,14 +282,43 @@ function _initButtonGroup (group_id) {
     });
 }
 
+function initMaze () {
+    let solve_button = document.getElementById('solve');
+    maze = new Maze('maze', document.querySelector('#maze-selection .active').getAttribute('filename'));
+    solve_button.classList.add('disabled');
+    return maze.drawCurrent().then(() => solve_button.classList.remove('disabled'));
+}
+
+function runSolver () {
+    let solve_button = document.getElementById('solve');
+    let solver = new DFSSolver(maze);
+    if (solver.solve()) {
+        displayInfo('Found solution in TODO seconds.');
+    } else {
+        displayInfo('Determined maze had no solution in TODO seconds.');
+    }
+
+    solve_button.classList.add('disabled');
+    maze.drawIterations().then(() => solve_button.classList.remove('disabled'));
+}
+
 function initUI () {
+    let solve_button = document.getElementById('solve');
     _initButtonGroup('algorithm-selection');
     _initButtonGroup('maze-selection');
     _initButtonGroup('animation-speed');
 
-    document.getElementById('maze-selection').addEventListener('click', (event) => {
-        maze = new Maze('maze', event.target.getAttribute('filename'));
-        maze.drawCurrent();
+    document.getElementById('maze-selection').addEventListener('click', () => initMaze());
+
+    solve_button.addEventListener('click', () => {
+        if (solve_button.classList.contains('disabled')) {
+            return;
+        }
+        if (maze.solved) {
+            initMaze().then(runSolver);
+        } else {
+            runSolver();
+        }
     });
 }
 
@@ -302,16 +337,6 @@ function displayWarning (message) {
 }
 
 function init () {
-    maze = new Maze('maze', 'big.png');
-    maze.drawCurrent();// .then(() => {
-    //     let solver = new DFSSolver(maze);
-    //     if (solver.solve()) {
-    //         displayInfo('Found solution in TODO seconds.');
-    //     } else {
-    //         displayInfo('Determined maze had no solution in TODO seconds.');
-    //     }
-    //     maze.drawIterations(50);
-    // });
-
+    initMaze();
     initUI(maze);
 }
