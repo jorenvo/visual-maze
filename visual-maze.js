@@ -109,13 +109,19 @@ class Maze {
     drawIterations () {
         let current_iteration = 0;
         let draw_function = () => {
-            this.draw(current_iteration++);
+            let delay_ms = getCurrentAnimationSpeedMs();
 
-            if (current_iteration < this.getNumberOfIterations()) {
-                setTimeout(draw_function, getCurrentAnimationSpeedMs());
+            if (delay_ms) {
+                this.draw(current_iteration++);
+
+                if (current_iteration < this.getNumberOfIterations()) {
+                    setTimeout(draw_function, getCurrentAnimationSpeedMs());
+                }
+            } else {
+                this.drawCurrent();
             }
         };
-        setTimeout(draw_function, getCurrentAnimationSpeedMs());
+        draw_function();
     }
 }
 
