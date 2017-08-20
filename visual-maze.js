@@ -298,7 +298,7 @@ function runSolver () {
     if (solved) {
         displayInfo(`Found solution in ${elapsed_time} seconds.`);
     } else {
-        displayInfo(`Determined maze had no solution in ${elapsed_time} seconds.`);
+        displayInfo(`Determined maze has no solution in ${elapsed_time} seconds.`);
     }
 
     solve_button.classList.add('disabled');
