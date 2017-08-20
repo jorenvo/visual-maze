@@ -1,0 +1,15 @@
+.btn-secondary.focus, .btn-secondary:focus {
+    box-shadow: unset;
+}
+
+.btn-primary.focus, .btn-primary:focus {
+    box-shadow: unset;
+}
+                                     
+.btn-toolbar {
+    display: block;
+}
+
+.option-group {
+    padding-bottom: 10px;
+}

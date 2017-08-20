@@ -97,7 +97,22 @@ function image2maze (image_data) {
     return maze;
 }
 
+function _initButtonGroup (group_id) {
+    let buttons = document.getElementById(group_id);
+    buttons.addEventListener('click', (event) => {
+        buttons.querySelectorAll('button').forEach((button) => button.classList.remove('active'));
+        event.target.classList.add('active');
+    });
+}
+
+function initUI () {
+    _initButtonGroup('algorithm-selection');
+    _initButtonGroup('maze-selection');
+}
+
 function init () {
-    let maze = new Maze('maze', 'simple.png');
+    let maze = new Maze('maze', 'big.png');
     maze.draw();
+
+    initUI();
 }
