@@ -293,16 +293,19 @@ function runSolver () {
     let solve_button = document.getElementById('solve');
     let solver = new DFSSolver(maze);
     let start_time = Date.now();
-    let solved = solver.solve();
-    let elapsed_time = (Date.now() - start_time) / 1000;
-    if (solved) {
-        displayInfo(`Found solution in ${elapsed_time} seconds.`);
-    } else {
-        displayInfo(`Determined maze has no solution in ${elapsed_time} seconds.`);
-    }
 
     solve_button.classList.add('disabled');
-    maze.drawIterations().then(() => solve_button.classList.remove('disabled'));
+    setTimeout(() => {
+        let solved = solver.solve();
+        let elapsed_time = (Date.now() - start_time) / 1000;
+
+        if (solved) {
+            displayInfo(`Found solution in ${elapsed_time} seconds.`);
+        } else {
+            displayInfo(`Determined maze has no solution in ${elapsed_time} seconds.`);
+        }
+        maze.drawIterations().then(() => solve_button.classList.remove('disabled'));
+    }, 0);
 }
 
 function initUI () {
