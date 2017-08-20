@@ -42,11 +42,11 @@ class Maze {
         for (let i = 0; i <= image_data.data.length; ++i) {
             if (i && i % 4 === 0) {
                 let new_square = new Square();
-                new_square.initFromRGBA(...rgba);
+                new_square.setFromRGBA(...rgba);
 
-                if (new_square.type === 'entrance') {
+                if (new_square.getCurrentType() === 'entrance') {
                     this.entrance = new Position(this.square.length % this.width, Math.floor(this.square.length / this.width));
-                } else if (new_square.type === 'exit') {
+                } else if (new_square.getCurrentType() === 'exit') {
                     this.exit = new Position(this.square.length % this.height, Math.floor(this.square.length / this.width));
                 }
 
@@ -76,6 +76,10 @@ class Maze {
         return this.getSquare(position).hasToBeHandled();
     }
 
+    newIteration () {
+        this.square.forEach((square) => square.newIteration());
+    }
+
     getSquare (position) {
         return this.square[position.row * this.width + position.column];
     }
@@ -85,7 +89,7 @@ class Maze {
             for (let row = 0; row < this.height; ++row) {
                 for (let column = 0; column < this.width; ++column) {
                     let position = new Position(column, row);
-                    this.context.fillStyle = this.getSquare(position).toRGB();
+                    this.context.fillStyle = this.getSquare(position).getCurrentRGB();
                     this.context.fillRect(column, row, 1, 1);
                 }
             }
@@ -94,19 +98,35 @@ class Maze {
 }
 
 class Square {
-    initFromRGBA (r, g, b, a) {
+    constructor () {
+        this.type = ['path'];
+    }
+
+    newIteration () {
+        this.type.push(this.type[this.type.length - 1]);
+    }
+
+    getCurrentType () {
+        return this.type[this.type.length - 1];
+    }
+
+    setCurrentType (type) {
+        this.type[this.type.length - 1] = type;
+    }
+
+    setFromRGBA (r, g, b, a) {
         if (r === 255 && g === 255 && b === 255) {
-            this.type = 'path';
+            this.setCurrentType('path');
         } else if (r === 0 && g === 255 && b === 0) {
-            this.type = 'entrance';
+            this.setCurrentType('entrance');
         } else if (r === 0 && g === 0 && b === 255) {
-            this.type = 'exit';
+            this.setCurrentType('exit');
         } else {
-            this.type = 'wall';
+            this.setCurrentType('wall');
         }
     }
 
-    toRGB () {
+    getRGB (time) {
         const TYPE2RGB = {
             path: 'rgb(255, 255, 255)',
             entrance: 'rgb(255, 255, 255)',
@@ -116,11 +136,16 @@ class Square {
             traversed: 'rgb(100, 100, 100)',
         };
 
-        return TYPE2RGB[this.type];
+        return TYPE2RGB[this.type[time]];
+    }
+
+    getCurrentRGB () {
+        return this.getRGB(this.type.length - 1);
     }
 
     hasToBeHandled () {
-        return this.type === 'path' || this.type === 'entrance' || this.type === 'exit';
+        let type = this.getCurrentType();
+        return type === 'path' || type === 'entrance' || type === 'exit';
     }
 }
 
@@ -175,13 +200,14 @@ class DFSSolver extends Solver {
             return false;
         }
 
+        this.maze.newIteration();
         this.path.push(position);
 
         if (position.equals(this.maze.exit)) {
             return true;
         }
 
-        this.maze.getSquare(position).type = 'traversed';
+        this.maze.getSquare(position).setCurrentType('traversed');
 
         if (this.findExit(position.getEast())) {
             return true;
@@ -198,7 +224,7 @@ class DFSSolver extends Solver {
     }
 
     markSolution () {
-        this.path.forEach((position) => this.maze.getSquare(position).type = 'solution');
+        this.path.forEach((position) => this.maze.getSquare(position).setCurrentType('solution'));
     }
 }
 
@@ -230,7 +256,7 @@ function displayWarning (message) {
 }
 
 function init () {
-    let maze = new Maze('maze', 'big.png');
+    let maze = new Maze('maze', 'simple.png');
     maze.draw().then(() => {
         let solver = new DFSSolver(maze);
         if (solver.solve()) {
@@ -238,7 +264,7 @@ function init () {
         } else {
             displayInfo('Determined maze had no solution in TODO seconds.');
         }
-        maze.draw();
+        maze.drawIterations(500);
     });
 
     initUI();
