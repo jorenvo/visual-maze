@@ -170,8 +170,8 @@ class Square {
     getRGB (iteration) {
         const TYPE2RGB = {
             path: 'rgb(255, 255, 255)',
-            entrance: 'rgb(255, 255, 255)',
-            exit: 'rgb(255, 255, 255)',
+            entrance: 'rgb(255, 0, 0)',
+            exit: 'rgb(0, 255, 0)',
             wall: 'rgb(0, 0, 0)',
             solution: 'rgb(255, 0, 0)',
             traversed: 'rgb(100, 100, 100)',
