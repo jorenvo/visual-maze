@@ -1,5 +1,7 @@
 'use strict';
 
+let maze;
+
 class Maze {
     constructor (canvas_id, init_image_name) {
         this.canvas = document.getElementById(canvas_id);
@@ -31,6 +33,7 @@ class Maze {
                 let image_data = context.getImageData(0, 0, image.width, image.height);
                 this._initSquaresFromImageData(image_data);
                 this._validateState();
+                this.context.setTransform(1, 0, 0, 1, 0, 0);
                 this.context.scale(this.canvas.width / this.width, this.canvas.height / this.height);
                 resolve();
             };
@@ -90,6 +93,7 @@ class Maze {
 
     draw (iteration) {
         return this.initialized.then(() => {
+            this.context.clearRect(0, 0, this.width, this.height);
             for (let row = 0; row < this.height; ++row) {
                 for (let column = 0; column < this.width; ++column) {
                     let position = new Position(column, row);
@@ -276,6 +280,11 @@ function initUI () {
     _initButtonGroup('algorithm-selection');
     _initButtonGroup('maze-selection');
     _initButtonGroup('animation-speed');
+
+    document.getElementById('maze-selection').addEventListener('click', (event) => {
+        maze = new Maze('maze', event.target.getAttribute('filename'));
+        maze.drawCurrent();
+    });
 }
 
 function _displayMessage (id, message) {
@@ -293,16 +302,16 @@ function displayWarning (message) {
 }
 
 function init () {
-    let maze = new Maze('maze', 'big.png');
-    maze.drawCurrent().then(() => {
-        let solver = new DFSSolver(maze);
-        if (solver.solve()) {
-            displayInfo('Found solution in TODO seconds.');
-        } else {
-            displayInfo('Determined maze had no solution in TODO seconds.');
-        }
-        maze.drawIterations(50);
-    });
+    maze = new Maze('maze', 'big.png');
+    maze.drawCurrent();// .then(() => {
+    //     let solver = new DFSSolver(maze);
+    //     if (solver.solve()) {
+    //         displayInfo('Found solution in TODO seconds.');
+    //     } else {
+    //         displayInfo('Determined maze had no solution in TODO seconds.');
+    //     }
+    //     maze.drawIterations(50);
+    // });
 
-    initUI();
+    initUI(maze);
 }
