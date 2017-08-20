@@ -233,7 +233,7 @@ class DFSSolver extends Solver {
     solve () {
         super.solve();
         let found_exit = this.findExit(this.maze.entrance);
-        this.markSolution();
+        this._markSolution();
         return found_exit;
     }
 
@@ -265,8 +265,50 @@ class DFSSolver extends Solver {
         return false;
     }
 
-    markSolution () {
+    _markSolution () {
         this.path.forEach((position) => this.maze.getSquare(position).setCurrentType('solution'));
+    }
+}
+
+class BFSSolver extends Solver {
+    solve () {
+        super.solve();
+        let found_exit = this.findExit(this.maze.entrance);
+        return found_exit;
+    }
+
+    _markSolution (current_position) {
+        while (current_position) {
+            this.maze.getSquare(current_position).setCurrentType('solution');
+            current_position = current_position.parent;
+        }
+    }
+
+    _getChildren (position) {
+        let children = [position.getEast(), position.getSouth(),
+                        position.getWest(), position.getNorth()];
+        children = children.filter((child) => this.maze.hasToBeHandled(child));
+        children.forEach((child) => child.parent = position);
+        return children;
+    }
+
+    findExit (position) {
+        let children = this._getChildren(position);
+
+        while (children.length) {
+            let current_position = children.pop(0);
+            this.maze.newIteration();
+            this.maze.getSquare(current_position).setCurrentType('traversed');
+
+            if (current_position.equals(this.maze.exit)) {
+                this._markSolution(current_position);
+                return true;
+            }
+
+            children.push(...this._getChildren(current_position));
+        }
+
+        return false;
     }
 }
 
@@ -277,8 +319,11 @@ function getCurrentAnimationSpeedMs () {
 function _initButtonGroup (group_id) {
     let buttons = document.getElementById(group_id);
     buttons.addEventListener('click', (event) => {
-        buttons.querySelectorAll('button').forEach((button) => button.classList.remove('active'));
-        event.target.classList.add('active');
+        let clicked_button = event.target;
+        if (! clicked_button.classList.contains('disabled')) {
+            buttons.querySelectorAll('button').forEach((button) => button.classList.remove('active'));
+            clicked_button.classList.add('active');
+        }
     });
 }
 
@@ -291,8 +336,15 @@ function initMaze () {
 
 function runSolver () {
     let solve_button = document.getElementById('solve');
-    let solver = new DFSSolver(maze);
+    let solver;
     let start_time = Date.now();
+
+    let selected_algorithm_id = document.querySelector('#algorithm-selection .active').getAttribute('id');
+    if (selected_algorithm_id === "DFS") {
+        solver = new DFSSolver(maze);
+    } else {
+        solver = new BFSSolver(maze);
+    }
 
     solve_button.classList.add('disabled');
     setTimeout(() => {
