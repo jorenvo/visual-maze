@@ -106,15 +106,16 @@ class Maze {
         });
     }
 
-    drawIterations (ms_per_iteration) {
+    drawIterations () {
         let current_iteration = 0;
-        let drawer = setInterval(() => {
+        let draw_function = () => {
             this.draw(current_iteration++);
 
-            if (current_iteration >= this.getNumberOfIterations()) {
-                clearInterval(drawer);
+            if (current_iteration < this.getNumberOfIterations()) {
+                setTimeout(draw_function, getCurrentAnimationSpeedMs());
             }
-        }, ms_per_iteration);
+        };
+        setTimeout(draw_function, getCurrentAnimationSpeedMs());
     }
 }
 
@@ -253,6 +254,10 @@ class DFSSolver extends Solver {
     }
 }
 
+function getCurrentAnimationSpeedMs () {
+    return parseInt(document.querySelector('#animation-speed .active').getAttribute('delay-ms'), 10);
+}
+
 function _initButtonGroup (group_id) {
     let buttons = document.getElementById(group_id);
     buttons.addEventListener('click', (event) => {
@@ -264,6 +269,7 @@ function _initButtonGroup (group_id) {
 function initUI () {
     _initButtonGroup('algorithm-selection');
     _initButtonGroup('maze-selection');
+    _initButtonGroup('animation-speed');
 }
 
 function _displayMessage (id, message) {
