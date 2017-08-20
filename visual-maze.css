@@ -13,3 +13,11 @@
 .option-group {
     padding-bottom: 10px;
 }
+
+.alert {
+    margin-bottom: 10px;
+}
+
+.hide {
+    display: none;
+}

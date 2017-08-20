@@ -8,6 +8,15 @@ class Maze {
         this.initialized = this._initializeFrom(init_image_name);
     }
 
+    _validateState () {
+        if (! this.entrance) {
+            displayWarning('No entrance found.');
+        }
+        if (! this.exit) {
+            displayWarning('No exit found.');
+        }
+    }
+
     _initializeFrom (image_name) {
         return new Promise((resolve, _) => {
             let offscreen_canvas = document.createElement('canvas');
@@ -21,6 +30,7 @@ class Maze {
                 this.maze_height = image.height;
                 let image_data = context.getImageData(0, 0, image.width, image.height);
                 this._initSquaresFromImageData(image_data);
+                this._validateState();
                 resolve();
             };
         });
@@ -112,8 +122,14 @@ function initUI () {
     _initButtonGroup('maze-selection');
 }
 
+function displayWarning (message) {
+    let warning = document.getElementById('warning');
+    warning.innerHTML = message;
+    warning.classList.remove('hide');
+}
+
 function init () {
-    let maze = new Maze('maze', 'simple.png');
+    let maze = new Maze('maze', 'big.png');
     maze.draw();
 
     initUI();
