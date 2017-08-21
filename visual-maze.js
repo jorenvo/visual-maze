@@ -13,10 +13,10 @@ class Maze {
 
     _validateState () {
         if (! this.entrance) {
-            displayWarning('No entrance found.');
+            setWarning('No entrance found.');
         }
         if (! this.exit) {
-            displayWarning('No exit found.');
+            setWarning('No exit found.');
         }
     }
 
@@ -111,6 +111,7 @@ class Maze {
         });
     }
 
+    // todo optimize by only drawing diff
     drawIterations () {
         return new Promise((resolve, _) => {
             let current_iteration = 0;
@@ -346,8 +347,23 @@ function initMaze () {
     return maze.drawCurrent().then(() => solve_button.classList.remove('disabled'));
 }
 
+function _getButtonsToDisable () {
+    let buttons_to_disable = [];
+    buttons_to_disable.push(document.getElementById('solve'));
+    buttons_to_disable.push(...document.querySelectorAll('#algorithm-selection button'));
+    buttons_to_disable.push(...document.querySelectorAll('#maze-selection button'));
+    return buttons_to_disable;
+}
+
+function disableControls () {
+    _getButtonsToDisable().forEach((button) => button.classList.add('disabled'));
+}
+
+function enableControls () {
+    _getButtonsToDisable().forEach((button) => button.classList.remove('disabled'));
+}
+
 function runSolver () {
-    let solve_button = document.getElementById('solve');
     let solver;
     let start_time = Date.now();
 
@@ -358,17 +374,20 @@ function runSolver () {
         solver = new BFSSolver(maze);
     }
 
-    solve_button.classList.add('disabled');
+    setInfo();
+    setWarning();
+    disableControls();
+
     setTimeout(() => {
         let solved = solver.solve();
         let elapsed_time = (Date.now() - start_time) / 1000;
 
         if (solved) {
-            displayInfo(`Found solution in ${elapsed_time} seconds.`);
+            setInfo(`Found solution in ${elapsed_time} seconds.`);
         } else {
-            displayInfo(`Determined maze has no solution in ${elapsed_time} seconds.`);
+            setInfo(`Determined maze has no solution in ${elapsed_time} seconds.`);
         }
-        maze.drawIterations().then(() => solve_button.classList.remove('disabled'));
+        maze.drawIterations().then(enableControls);
     }, 0);
 }
 
@@ -378,7 +397,11 @@ function initUI () {
     _initButtonGroup('maze-selection');
     _initButtonGroup('animation-speed');
 
-    document.getElementById('maze-selection').addEventListener('click', () => initMaze());
+    document.getElementById('maze-selection').addEventListener('click', (event) => {
+        if (! event.target.classList.contains('disabled')) {
+            initMaze();
+        }
+    });
 
     solve_button.addEventListener('click', () => {
         if (solve_button.classList.contains('disabled')) {
@@ -392,18 +415,23 @@ function initUI () {
     });
 }
 
-function _displayMessage (id, message) {
+function _setMessage (id, message) {
     let element = document.getElementById(id);
     element.innerHTML = message;
-    element.classList.remove('hide');
+
+    if (message) {
+        element.classList.remove('hide');
+    } else {
+        element.classList.add('hide');
+    }
 }
 
-function displayInfo (message) {
-    _displayMessage('info', message);
+function setInfo (message) {
+    _setMessage('info', message);
 }
 
-function displayWarning (message) {
-    _displayMessage('warning', message);
+function setWarning (message) {
+    _setMessage('warning', message);
 }
 
 function init () {
