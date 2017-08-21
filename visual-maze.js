@@ -294,11 +294,23 @@ class BFSSolver extends Solver {
 
     findExit (position) {
         let children = this._getChildren(position);
+        this.maze.getSquare(position).setCurrentType('traversed');
 
         while (children.length) {
-            let current_position = children.pop(0);
-            this.maze.newIteration();
+            let current_position = children.shift();
+
+            // A maze is effectively an undirected graph with
+            // loops. This means a child can have multiple parents. So
+            // it's possible that the same position appears >1 times
+            // in the children array. This makes sure not to waste
+            // time processing a position if it has already been done
+            // in before.
+            if (this.maze.getSquare(current_position).getCurrentType() === 'traversed') {
+                continue;
+            }
+
             this.maze.getSquare(current_position).setCurrentType('traversed');
+            this.maze.newIteration();
 
             if (current_position.equals(this.maze.exit)) {
                 this._markSolution(current_position);
