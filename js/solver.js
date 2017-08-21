@@ -105,7 +105,7 @@ class BFSSolver extends Solver {
     }
 }
 
-class AStarSolver extends Solver {
+class PriorityBFSSolver extends Solver {
         solve () {
         super.solve();
         let found_exit = this.findExit(this.maze.entrance);
@@ -152,6 +152,10 @@ class AStarSolver extends Solver {
 
         while (! priority_queue.isEmpty()) {
             let current_position = priority_queue.shift();
+
+            if (this.maze.getSquare(current_position).getCurrentType() === 'traversed') {
+                continue;
+            }
 
             this.maze.getSquare(current_position).setCurrentType('traversed');
             this.maze.newIteration();

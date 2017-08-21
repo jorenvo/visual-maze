@@ -273,7 +273,7 @@ function runSolver () {
     } else if (selected_algorithm_id === "BFS") {
         solver = new BFSSolver(maze);
     } else {
-        solver = new AStarSolver(maze);
+        solver = new PriorityBFSSolver(maze);
     }
 
     setInfo();
