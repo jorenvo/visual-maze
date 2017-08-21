@@ -263,8 +263,10 @@ function runSolver () {
     let selected_algorithm_id = document.querySelector('#algorithm-selection .active').getAttribute('id');
     if (selected_algorithm_id === "DFS") {
         solver = new DFSSolver(maze);
-    } else {
+    } else if (selected_algorithm_id === "BFS") {
         solver = new BFSSolver(maze);
+    } else {
+        solver = new AStarSolver(maze);
     }
 
     setInfo();
