@@ -84,6 +84,13 @@ class Maze {
         return this.getSquare(new Position(0, 0)).getNumberOfIterations();
     }
 
+    getNumberOfTraversedPositions () {
+        return this.square.filter((square) => {
+            let type = square.getCurrentType();
+            return type === 'traversed' || type === 'solution';
+        }).length;
+    }
+
     newIteration () {
         this.square.forEach((square) => square.newIteration());
     }
@@ -278,9 +285,9 @@ function runSolver () {
         let elapsed_time = (Date.now() - start_time) / 1000;
 
         if (solved) {
-            setInfo(`Found solution in ${elapsed_time} seconds.`);
+            setInfo(`Found a solution by traversing ${maze.getNumberOfTraversedPositions()} positions. This took ${elapsed_time} seconds.`);
         } else {
-            setInfo(`Determined maze has no solution in ${elapsed_time} seconds.`);
+            setInfo(`Determined maze has no solution by traversing ${maze.getNumberOfTraversedPositions()} positions. This took ${elapsed_time} seconds.`);
         }
         maze.drawIterations().then(enableControls);
     }, 0);
