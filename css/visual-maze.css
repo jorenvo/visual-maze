@@ -21,3 +21,14 @@
 .hide {
     display: none;
 }
+
+#maze {
+    margin-top: 10px;
+    border: 1px solid #000000;
+}
+
+.github-logo {
+    color: #000000;
+    padding-top: 10px;
+    width: 25px;
+}
