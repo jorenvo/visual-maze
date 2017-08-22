@@ -284,6 +284,7 @@ function _getButtonsToDisable () {
     buttons_to_disable.push(document.getElementById('solve'));
     buttons_to_disable.push(...document.querySelectorAll('#algorithm-selection button'));
     buttons_to_disable.push(...document.querySelectorAll('#maze-selection button'));
+    buttons_to_disable.push(...document.querySelectorAll('#allow-diagonal button'));
     return buttons_to_disable;
 }
 
