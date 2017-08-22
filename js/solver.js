@@ -172,9 +172,13 @@ class AStarSolver extends Solver {
         return this.findExit(this.maze.entrance);
     }
 
-    _cost_estimate (position) {
-        let exit = this.maze.exit;
-        return Math.sqrt(Math.pow(position.column - exit.column, 2) + Math.pow(position.row - exit.row, 2));
+    _cost (from, to) {
+        // moving diagonally takes longer than moving straight
+        return Math.sqrt(Math.pow(from.column - to.column, 2) + Math.pow(from.row - to.row, 2));
+    }
+
+    _cost_estimate_to_exit (position) {
+        return this._cost(position, this.maze.exit);
     }
 
     _markSolution (current_position) {
@@ -189,7 +193,7 @@ class AStarSolver extends Solver {
         let open_positions = new PriorityQueue();
         let best_score_from_start_to = {};
         
-        open_positions.insert(parent, this._cost_estimate(parent));
+        open_positions.insert(parent, this._cost_estimate_to_exit(parent));
         best_score_from_start_to[parent] = 0;
 
         while (! open_positions.isEmpty()) {
@@ -208,14 +212,14 @@ class AStarSolver extends Solver {
                     return;
                 }
 
-                let score_from_start_to_child = best_score_from_start_to[parent] + 1;
+                let score_from_start_to_child = best_score_from_start_to[parent] + this._cost(parent, child);
                 if (best_score_from_start_to[child] && score_from_start_to_child >= best_score_from_start_to[child]) {
                     return;
                 }
 
                 child.parent = parent;
                 best_score_from_start_to[child] = score_from_start_to_child;
-                open_positions.insert(child, score_from_start_to_child + this._cost_estimate(child));
+                open_positions.insert(child, score_from_start_to_child + this._cost_estimate_to_exit(child));
             });
         }
 
