@@ -91,12 +91,40 @@ class Maze {
         }).length;
     }
 
+    getSolutionLength () {
+        return this.square.filter((square) => square.getCurrentType() === 'solution').length;
+    }
+
     newIteration () {
         this.square.forEach((square) => square.newIteration());
     }
 
     getSquare (position) {
         return this.square[position.row * this.width + position.column];
+    }
+
+    getChildren (position) {
+        let children = [];
+        let column = position.column;
+        let row = position.row;
+        let allow_diagonals = document.querySelector('#allow-diagonal .active').getAttribute('allow-diagonal');
+
+        // prefer straight directions starting east
+        children.push(new Position(column + 1, row));
+        children.push(new Position(column, row + 1));
+        children.push(new Position(column - 1, row));
+        children.push(new Position(column, row - 1));
+
+        // get diagonals starting southeast
+        if (allow_diagonals) {
+            children.push(new Position(column + 1, row - 1));
+            children.push(new Position(column - 1, row + 1));
+            children.push(new Position(column - 1, row - 1));
+            children.push(new Position(column + 1, row + 1));
+        }
+
+        children = children.filter((child) => this.hasToBeHandled(child));
+        return children;
     }
 
     draw (iteration) {
@@ -223,6 +251,10 @@ class Position {
     getNorth () {
         return new Position(this.column, this.row - 1);
     }
+
+    toString () {
+        return `${this.column}, ${this.row}`;
+    }
 }
 
 function getCurrentAnimationSpeedMs () {
@@ -268,12 +300,14 @@ function runSolver () {
     let start_time = Date.now();
 
     let selected_algorithm_id = document.querySelector('#algorithm-selection .active').getAttribute('id');
-    if (selected_algorithm_id === "DFS") {
+    if (selected_algorithm_id === 'DFS') {
         solver = new DFSSolver(maze);
-    } else if (selected_algorithm_id === "BFS") {
+    } else if (selected_algorithm_id === 'BFS') {
         solver = new BFSSolver(maze);
-    } else {
+    } else if (selected_algorithm_id === 'PriorityBFS') {
         solver = new PriorityBFSSolver(maze);
+    } else {
+        solver = new AStarSolver(maze);
     }
 
     setInfo();
@@ -285,7 +319,8 @@ function runSolver () {
         let elapsed_time = (Date.now() - start_time) / 1000;
 
         if (solved) {
-            setInfo(`Found a solution by traversing ${maze.getNumberOfTraversedPositions()} positions. This took ${elapsed_time} seconds.`);
+            setInfo(`Found a solution by traversing ${maze.getNumberOfTraversedPositions()} positions. 
+Solution is ${maze.getSolutionLength()} squares long. This took ${elapsed_time} seconds.`);
         } else {
             setInfo(`Determined maze has no solution by traversing ${maze.getNumberOfTraversedPositions()} positions. This took ${elapsed_time} seconds.`);
         }
@@ -298,6 +333,7 @@ function initUI () {
     _initButtonGroup('algorithm-selection');
     _initButtonGroup('maze-selection');
     _initButtonGroup('animation-speed');
+    _initButtonGroup('allow-diagonal');
 
     document.getElementById('maze-selection').addEventListener('click', (event) => {
         if (! event.target.classList.contains('disabled')) {

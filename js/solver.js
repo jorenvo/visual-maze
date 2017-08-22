@@ -32,13 +32,11 @@ class DFSSolver extends Solver {
 
         this.maze.getSquare(position).setCurrentType('traversed');
 
-        if (this.findExit(position.getEast())) {
-            return true;
-        } else if (this.findExit(position.getSouth())) {
-            return true;
-        } else if (this.findExit(position.getWest())) {
-            return true;
-        } else if (this.findExit(position.getNorth())) {
+        let found_exit = this.maze.getChildren(position).find((new_position) => {
+            return this.findExit(new_position);
+        });
+
+        if (found_exit) {
             return true;
         }
 
@@ -66,9 +64,7 @@ class BFSSolver extends Solver {
     }
 
     _getChildren (position) {
-        let children = [position.getEast(), position.getSouth(),
-                        position.getWest(), position.getNorth()];
-        children = children.filter((child) => this.maze.hasToBeHandled(child));
+        let children = this.maze.getChildren(position);
         children.forEach((child) => child.parent = position);
         return children;
     }
@@ -106,7 +102,7 @@ class BFSSolver extends Solver {
 }
 
 class PriorityBFSSolver extends Solver {
-        solve () {
+    solve () {
         super.solve();
         let found_exit = this.findExit(this.maze.entrance);
         return found_exit;
@@ -120,9 +116,7 @@ class PriorityBFSSolver extends Solver {
     }
 
     _getChildren (position) {
-        let children = [position.getEast(), position.getSouth(),
-                        position.getWest(), position.getNorth()];
-        children = children.filter((child) => this.maze.hasToBeHandled(child));
+        let children = this.maze.getChildren(position);
         children.forEach((child) => {
             child.parent = position;
             if (position.cost) {
@@ -166,6 +160,63 @@ class PriorityBFSSolver extends Solver {
             }
 
             this._getChildren(current_position).forEach((child) => priority_queue.insert(child, child.cost_from_start + child.cost_to_exit));
+        }
+
+        return false;
+    }
+}
+
+class AStarSolver extends Solver {
+    solve () {
+        super.solve();
+        return this.findExit(this.maze.entrance);
+    }
+
+    _cost_estimate (position) {
+        let exit = this.maze.exit;
+        return Math.sqrt(Math.pow(position.column - exit.column, 2) + Math.pow(position.row - exit.row, 2));
+    }
+
+    _markSolution (current_position) {
+        while (current_position) {
+            this.maze.getSquare(current_position).setCurrentType('solution');
+            current_position = current_position.parent;
+        }
+    }
+
+    findExit (parent) {
+        // already evaluated will be marked 'traversed'
+        let open_positions = new PriorityQueue();
+        let best_score_from_start_to = {};
+        
+        open_positions.insert(parent, this._cost_estimate(parent));
+        best_score_from_start_to[parent] = 0;
+
+        while (! open_positions.isEmpty()) {
+            parent = open_positions.shift();
+
+            if (parent.equals(this.maze.exit)) {
+                this._markSolution(parent);
+                return true;
+            }
+
+            this.maze.newIteration();
+            this.maze.getSquare(parent).setCurrentType('traversed');
+
+            this.maze.getChildren(parent).forEach((child) => {
+                if (this.maze.getSquare(child).getCurrentType() === 'traversed') {
+                    return;
+                }
+
+                let score_from_start_to_child = best_score_from_start_to[parent] + 1;
+                if (best_score_from_start_to[child] && score_from_start_to_child >= best_score_from_start_to[child]) {
+                    return;
+                }
+
+                child.parent = parent;
+                best_score_from_start_to[child] = score_from_start_to_child;
+                open_positions.insert(child, score_from_start_to_child + this._cost_estimate(child));
+            });
         }
 
         return false;
