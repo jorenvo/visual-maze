@@ -3,7 +3,9 @@
   <head>
     <meta charset="UTF-8">
     <title>visual-maze</title>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M" crossorigin="anonymous">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
     <link rel="stylesheet" href="css/visual-maze.css">
     <script src="js/priority-queue.js"></script>
     <script src="js/solver.js"></script>
@@ -12,72 +14,72 @@
   <body onload="init();">
     <div class="container">
       <div class="row">
-        <div class="col-12 text-center">
+        <div class="col-sm-offset-3 col-sm-6">
           <canvas id="maze" width="400" height="400"></canvas>
         </div>
       </div>
       <div class="row">
-        <div class="col-12 text-center">
-          <div id="info" class="alert alert-primary hide" role="alert"></div>
+        <div class="col-sm-offset-3 col-sm-6 text-center">
+          <div id="info" class="bg-primary hide"></div>
         </div>
       </div>
       <div class="row">
-        <div class="col-12 text-center">
-          <div id="warning" class="alert alert-warning hide" role="alert"></div>
+        <div class="col-sm-offset-3 col-sm-6 text-center">
+          <div id="warning" class="bg-danger hide"></div>
         </div>
       </div>
       <div class="row">
-        <div class="col-12 text-center option-group">
+        <div class="col-sm-offset-3 col-sm-6 text-center option-group">
           <div id="algorithm-selection" class="btn-group" role="group" aria-label="Algorithm selection">
-            <button id="DFS" type="button" class="btn btn-secondary active">DFS</button>
-            <button id="BFS" type="button" class="btn btn-secondary">BFS</button>
-            <button id="PriorityBFS" type="button" class="btn btn-secondary">PriorityBFS (straight-line distance)</button>
-            <button id="A*" type="button" class="btn btn-secondary">A*</button>
+            <button id="DFS" type="button" class="btn btn-default active">DFS</button>
+            <button id="BFS" type="button" class="btn btn-default">BFS</button>
+            <button id="PriorityBFS" type="button" class="btn btn-default">PriorityBFS</button>
+            <button id="A*" type="button" class="btn btn-default">A*</button>
           </div>
         </div>
       </div>
       <div class="row">
-        <div class="col-12 text-center option-group">
-          <div id="maze-selection" class="btn-group" role="group" aria-label="Maze selection">
-            <button type="button" class="btn btn-secondary" filename="mazes/simple.png">Simple</button>
-            <button type="button" class="btn btn-secondary active" filename="mazes/medium.png">Medium</button>
-            <button type="button" class="btn btn-secondary" filename="mazes/large.png">Large</button>
-            <button type="button" class="btn btn-secondary" filename="mazes/huge.png">Huge</button>
-            <button type="button" class="btn btn-secondary" filename="mazes/impossible.png">Impossible</button>
-            <button type="button" class="btn btn-secondary" filename="mazes/shortest_path.png">Shortest Path</button>
-            <button type="button" class="btn btn-secondary" filename="mazes/bfs_vs_a_star.png">BFS vs A*</button>
-            <button type="button" class="btn btn-secondary" filename="mazes/empty.png">Empty</button>
-            <button type="button" class="btn btn-secondary" filename="mazes/obstacle.png">Obstacle</button>
-            <button type="button" class="btn btn-secondary" filename="mazes/path_finding.png">Path Finding</button>
-            <button type="button" class="btn btn-secondary" filename="mazes/funnel.png">Funnel</button>
-          </div>
+        <div class="col-sm-offset-4 col-sm-4 option-group">
+          <select id="maze-selection" class="form-control">
+            <option value="mazes/simple.png">Simple</option>
+            <option selected value="mazes/medium.png">Medium</option>
+            <option value="mazes/large.png">Large</option>
+            <option value="mazes/huge.png">Huge</option>
+            <option value="mazes/impossible.png">Impossible</option>
+            <option value="mazes/shortest_path.png">Shortest Path</option>
+            <option value="mazes/bfs_vs_a_star.png">BFS vs A*</option>
+            <option value="mazes/empty.png">Empty</option>
+            <option value="mazes/obstacle.png">Obstacle</option>
+            <option value="mazes/path_finding.png">Path Finding</option>
+            <option value="mazes/funnel.png">Funnel</option>
+          </select>
         </div>
       </div>
       <div class="row">
-        <div class="col-12 text-center option-group">
+        <div class="col-xs-12 text-center option-group">
           <div id="allow-diagonal" class="btn-group" role="group" aria-label="Allow diagonal">
-            <button type="button" class="btn btn-secondary active">No Diagonals</button>
-            <button type="button" class="btn btn-secondary" allow-diagonal="1">Allow Diagonals</button>
+            <button type="button" class="btn btn-default active">No Diagonals</button>
+            <button type="button" class="btn btn-default" allow-diagonal="1">Allow Diagonals</button>
           </div>
         </div>
       </div>
       <div class="row">
-        <div class="col-12 text-center option-group">
+        <div class="col-xs-12 text-center option-group">
           <div id="animation-speed" class="btn-group" role="group" aria-label="Animation speed">
-            <button type="button" class="btn btn-secondary" delay-ms="300">Slow</button>
-            <button type="button" class="btn btn-secondary active" delay-ms="50">Normal</button>
-            <button type="button" class="btn btn-secondary" delay-ms="1">Fast</button>
-            <button type="button" class="btn btn-secondary" delay-ms="0">Instant</button>
+            <button type="button" class="btn btn-default" delay-ms="300">Slow</button>
+            <button type="button" class="btn btn-default active" delay-ms="50">Normal</button>
+            <button type="button" class="btn btn-default" delay-ms="1">Fast</button>
+            <button type="button" class="btn btn-default" delay-ms="0">Instant</button>
           </div>
         </div>
       </div>
       <div class="row">
-        <div class="col-12 text-center">
+        <div class="col-xs-12 text-center">
           <button id="solve" type="button" class="btn btn-primary">Solve</button>
         </div>
       </div>
       <div class="row">
-        <div class="col-12 text-center">
+        <div class="col-xs-12 text-center">
           <a class="" href="https://github.com/jorenvo/visual-maze" target="_blank" rel="noopener" aria-label="GitHub">
             <svg class="github-logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 499.36" focusable="false"><title>GitHub</title><path d="M256 0C114.64 0 0 114.61 0 256c0 113.09 73.34 209 175.08 242.9 12.8 2.35 17.47-5.56 17.47-12.34 0-6.08-.22-22.18-.35-43.54-71.2 15.49-86.2-34.34-86.2-34.34-11.64-29.57-28.42-37.45-28.42-37.45-23.27-15.84 1.73-15.55 1.73-15.55 25.69 1.81 39.21 26.38 39.21 26.38 22.84 39.12 59.92 27.82 74.5 21.27 2.33-16.54 8.94-27.82 16.25-34.22-56.84-6.43-116.6-28.43-116.6-126.49 0-27.95 10-50.8 26.35-68.69-2.63-6.48-11.42-32.5 2.51-67.75 0 0 21.49-6.88 70.4 26.24a242.65 242.65 0 0 1 128.18 0c48.87-33.13 70.33-26.24 70.33-26.24 14 35.25 5.18 61.27 2.55 67.75 16.41 17.9 26.31 40.75 26.31 68.69 0 98.35-59.85 120-116.88 126.32 9.19 7.9 17.38 23.53 17.38 47.41 0 34.22-.31 61.83-.31 70.23 0 6.85 4.61 14.81 17.6 12.31C438.72 464.97 512 369.08 512 256.02 512 114.62 397.37 0 256 0z" fill="currentColor" fill-rule="evenodd"></path></svg>
           </a>

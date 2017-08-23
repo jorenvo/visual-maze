@@ -274,26 +274,27 @@ function _initButtonGroup (group_id) {
 
 function initMaze () {
     let solve_button = document.getElementById('solve');
-    maze = new Maze('maze', document.querySelector('#maze-selection .active').getAttribute('filename'));
+    let maze_selection = document.getElementById('maze-selection');
+    maze = new Maze('maze', maze_selection.options[maze_selection.options.selectedIndex].value);
     solve_button.classList.add('disabled');
     return maze.drawCurrent().then(() => solve_button.classList.remove('disabled'));
 }
 
-function _getButtonsToDisable () {
+function _getControlsToDisable () {
     let buttons_to_disable = [];
     buttons_to_disable.push(document.getElementById('solve'));
     buttons_to_disable.push(...document.querySelectorAll('#algorithm-selection button'));
-    buttons_to_disable.push(...document.querySelectorAll('#maze-selection button'));
+    buttons_to_disable.push(...document.querySelectorAll('#maze-selection'));
     buttons_to_disable.push(...document.querySelectorAll('#allow-diagonal button'));
     return buttons_to_disable;
 }
 
 function disableControls () {
-    _getButtonsToDisable().forEach((button) => button.classList.add('disabled'));
+    _getControlsToDisable().forEach((button) => button.setAttribute('disabled', 'disabled'));
 }
 
 function enableControls () {
-    _getButtonsToDisable().forEach((button) => button.classList.remove('disabled'));
+    _getControlsToDisable().forEach((button) => button.removeAttribute('disabled'));
 }
 
 function runSolver () {
@@ -336,10 +337,9 @@ function initUI () {
     _initButtonGroup('animation-speed');
     _initButtonGroup('allow-diagonal');
 
-    document.getElementById('maze-selection').addEventListener('click', (event) => {
-        if (! event.target.classList.contains('disabled')) {
-            initMaze();
-        }
+    let maze_selection = document.getElementById('maze-selection');
+    maze_selection.addEventListener('change', (event) => {
+        initMaze();
     });
 
     solve_button.addEventListener('click', () => {
